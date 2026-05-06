@@ -22,6 +22,7 @@ export default function DataPage() {
   const [players, setPlayers] = useState([]);
   const [drills, setDrills] = useState([]);
   const [exportOpen, setExportOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -65,6 +66,16 @@ export default function DataPage() {
     }
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [filteredEntries, tab]);
+
+  const isGroupCollapsed = (groupLabel) => collapsedGroups[`${tab}:${groupLabel}`] ?? true;
+
+  const toggleGroup = (groupLabel) => {
+    const key = `${tab}:${groupLabel}`;
+    setCollapsedGroups((current) => ({
+      ...current,
+      [key]: !(current[key] ?? true),
+    }));
+  };
 
   const handleDelete = async (entry) => {
     const confirmed = window.confirm(
@@ -163,32 +174,44 @@ export default function DataPage() {
       <div className="group-stack">
         {grouped.map(([groupLabel, groupEntries]) => (
           <section key={groupLabel} className="group-card">
-            <div className="group-card-header">
-              <h3>{groupLabel}</h3>
-              <span>{groupEntries.length} entries</span>
-            </div>
-            <div className="data-table">
-              {groupEntries.map((entry) => (
-                <div key={entry.id} className="data-row">
-                  <div>
-                    <strong>{tab === "player" ? entry.drill_name : entry.player_name}</strong>
-                    <p>{entry.entry_date}</p>
-                  </div>
-                  <div className="data-values">{formatValues(entry.values, entry.fields)}</div>
-                  <div className="data-row-actions">
-                    <button
-                      type="button"
-                      className="delete-chip"
-                      aria-label={`Delete score for ${entry.player_name} in ${entry.drill_name}`}
-                      disabled={deletingId === entry.id}
-                      onClick={() => handleDelete(entry)}
-                    >
-                      {deletingId === entry.id ? "..." : "×"}
-                    </button>
-                  </div>
+            <button
+              type="button"
+              className="group-toggle"
+              onClick={() => toggleGroup(groupLabel)}
+              aria-expanded={!isGroupCollapsed(groupLabel)}
+            >
+              <div className="group-card-header">
+                <h3>{groupLabel}</h3>
+                <div className="group-card-meta">
+                  <span>{groupEntries.length} entries</span>
+                  <span className="group-toggle-icon">{isGroupCollapsed(groupLabel) ? "+" : "−"}</span>
                 </div>
-              ))}
-            </div>
+              </div>
+            </button>
+            {!isGroupCollapsed(groupLabel) ? (
+              <div className="data-table">
+                {groupEntries.map((entry) => (
+                  <div key={entry.id} className="data-row">
+                    <div>
+                      <strong>{tab === "player" ? entry.drill_name : entry.player_name}</strong>
+                      <p>{entry.entry_date}</p>
+                    </div>
+                    <div className="data-values">{formatValues(entry.values, entry.fields)}</div>
+                    <div className="data-row-actions">
+                      <button
+                        type="button"
+                        className="delete-chip"
+                        aria-label={`Delete score for ${entry.player_name} in ${entry.drill_name}`}
+                        disabled={deletingId === entry.id}
+                        onClick={() => handleDelete(entry)}
+                      >
+                        {deletingId === entry.id ? "..." : "×"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </section>
         ))}
       </div>
