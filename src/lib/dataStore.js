@@ -193,6 +193,20 @@ export async function listDrillEntries() {
   return sortEntries(readJson(ENTRIES_STORAGE_KEY, []).map(normalizeEntry));
 }
 
+export async function deleteDrillEntry(entryId) {
+  if (supabase) {
+    const { error } = await supabase
+      .from("drill_entries")
+      .delete()
+      .eq("id", entryId);
+    if (error) throw error;
+    return;
+  }
+
+  const stored = readJson(ENTRIES_STORAGE_KEY, []).filter((entry) => entry.id !== entryId);
+  writeJson(ENTRIES_STORAGE_KEY, stored);
+}
+
 export function isUsingSupabase() {
   return Boolean(supabase);
 }
