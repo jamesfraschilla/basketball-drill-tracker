@@ -52,7 +52,6 @@ button {
 
 .app-header h1,
 .section-heading h2,
-.hero-card h2,
 .modal-header h2,
 .group-card h3,
 .entry-card h3 {
@@ -81,7 +80,6 @@ button {
   gap: 18px;
 }
 
-.hero-card,
 .entry-card,
 .group-card,
 .empty-state,
@@ -90,29 +88,6 @@ button {
   border: 1px solid var(--border);
   border-radius: 24px;
   box-shadow: var(--shadow);
-}
-
-.hero-card {
-  padding: 24px;
-  display: grid;
-  gap: 14px;
-}
-
-.hero-copy {
-  margin: 10px 0 0;
-  max-width: 700px;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.backend-pill {
-  width: fit-content;
-  border: 1px solid rgba(243, 190, 45, 0.2);
-  background: rgba(243, 190, 45, 0.1);
-  color: #ffe38d;
-  border-radius: 999px;
-  padding: 10px 14px;
-  font-size: 14px;
 }
 
 .top-nav,
@@ -197,6 +172,19 @@ button {
   gap: 16px;
 }
 
+.entry-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.entry-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .entry-grid,
 .group-stack {
   display: grid;
@@ -275,9 +263,6 @@ button {
 }
 
 .fab-button {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
   width: 68px;
   height: 68px;
   border: 0;
@@ -285,6 +270,11 @@ button {
   font-size: 40px;
   line-height: 1;
   box-shadow: 0 18px 38px rgba(243, 190, 45, 0.35);
+}
+
+.fab-button-inline {
+  position: static;
+  flex: 0 0 auto;
 }
 
 .modal-backdrop {
@@ -488,6 +478,7 @@ button {
 @media (max-width: 720px) {
   .app-header,
   .section-heading,
+  .entry-toolbar,
   .entry-card-header,
   .group-card-header,
   .modal-header {
@@ -501,10 +492,5 @@ button {
 
   .export-grid {
     grid-template-columns: 1fr;
-  }
-
-  .fab-button {
-    right: 16px;
-    bottom: 16px;
   }
 }

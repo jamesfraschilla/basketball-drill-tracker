@@ -7,8 +7,8 @@ export default function App() {
     <div className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">Basketball Drill Scores</p>
-          <h1>Drill Tracker</h1>
+          <p className="eyebrow">Washington Wizards</p>
+          <h1>Jump Season Drill Tracker</h1>
         </div>
         <nav className="top-nav" aria-label="Primary">
           <NavLink to="/" end className={({ isActive }) => navClassName(isActive)}>

@@ -129,7 +129,6 @@ export default function DataPage() {
       <div className="section-heading">
         <div>
           <p className="eyebrow">Saved Scores</p>
-          <h2>Data</h2>
         </div>
         <button
           type="button"

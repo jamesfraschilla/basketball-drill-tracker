@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AddScoreModal from "../components/AddScoreModal.jsx";
 import DrillEntryCard from "../components/DrillEntryCard.jsx";
-import {
-  createDrill,
-  createPlayer,
-  isUsingSupabase,
-  listDrills,
-  listPlayers,
-  saveDrillEntries,
-} from "../lib/dataStore.js";
+import { createDrill, createPlayer, listDrills, listPlayers, saveDrillEntries } from "../lib/dataStore.js";
 
 function buildDraftId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
@@ -46,11 +39,6 @@ export default function HomePage() {
       cancelled = true;
     };
   }, []);
-
-  const backendLabel = useMemo(
-    () => (isUsingSupabase() ? "Supabase live sync is active." : "Supabase env vars are missing, so this app is using local browser storage for now."),
-    []
-  );
 
   const handleCreateDrill = async (payload) => {
     const drill = await createDrill(payload);
@@ -105,32 +93,24 @@ export default function HomePage() {
 
   return (
     <section className="page-stack">
-      <div className="hero-card">
-        <div>
-          <p className="eyebrow">Daily Workflow</p>
-          <h2>Enter drill scores as they happen.</h2>
-          <p className="hero-copy">
-            Use the yellow plus button to pick a date, select or create drills and players,
-            and bring every selected combination onto the main page for entry.
-          </p>
-        </div>
-        <div className="backend-pill">{backendLabel}</div>
-      </div>
-
       {loading ? <div className="empty-state">Loading drills and players...</div> : null}
       {error ? <div className="form-error">{error}</div> : null}
       {status ? <div className="status-banner">{status}</div> : null}
 
-      <div className="section-heading">
+      <div className="entry-toolbar">
         <div>
           <p className="eyebrow">Active Drills</p>
-          <h2>Main Page</h2>
         </div>
-        {drafts.length ? (
-          <button type="button" className="primary-button" onClick={handleSaveAll} disabled={saving}>
-            {saving ? "Saving..." : "Save"}
+        <div className="entry-toolbar-actions">
+          {drafts.length ? (
+            <button type="button" className="primary-button" onClick={handleSaveAll} disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </button>
+          ) : null}
+          <button type="button" className="fab-button fab-button-inline" onClick={() => setModalOpen(true)} aria-label="Add drill score">
+            +
           </button>
-        ) : null}
+        </div>
       </div>
 
       {drafts.length ? (
@@ -146,13 +126,9 @@ export default function HomePage() {
         </div>
       ) : (
         <div className="empty-state">
-          No active drills yet. Tap the yellow plus button to add your first drill score entry.
+          No active drills yet. Tap the yellow '+' button to add your first drill score entry.
         </div>
       )}
-
-      <button type="button" className="fab-button" onClick={() => setModalOpen(true)} aria-label="Add drill score">
-        +
-      </button>
 
       <AddScoreModal
         open={modalOpen}
