@@ -297,6 +297,10 @@ button {
   padding: 22px;
 }
 
+.export-modal-card {
+  width: min(980px, 100%);
+}
+
 .modal-form {
   display: grid;
   gap: 16px;
@@ -372,6 +376,66 @@ button {
   min-height: 50px;
 }
 
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.export-list-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  min-height: 360px;
+}
+
+.export-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.export-list-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.export-list-header span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.export-checkbox-list {
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+}
+
+.export-list-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 720px) {
   .app-header,
   .section-heading,
@@ -383,6 +447,10 @@ button {
   }
 
   .data-row {
+    grid-template-columns: 1fr;
+  }
+
+  .export-grid {
     grid-template-columns: 1fr;
   }
 

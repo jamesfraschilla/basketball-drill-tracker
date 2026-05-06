@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { deleteDrillEntry, listDrillEntries } from "../lib/dataStore.js";
+import ExportGraphicModal from "../components/ExportGraphicModal.jsx";
+import { deleteDrillEntry, listDrillEntries, listDrills, listPlayers } from "../lib/dataStore.js";
+import { exportDrillGraphic } from "../lib/exportGraphic.js";
 
 function formatValues(values, fields) {
   const labelsByKey = new Map((fields || []).map((field) => [field.key, field.label]));
@@ -17,13 +19,24 @@ export default function DataPage() {
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [players, setPlayers] = useState([]);
+  const [drills, setDrills] = useState([]);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const nextEntries = await listDrillEntries();
-        if (!cancelled) setEntries(nextEntries);
+        const [nextEntries, nextPlayers, nextDrills] = await Promise.all([
+          listDrillEntries(),
+          listPlayers(),
+          listDrills(),
+        ]);
+        if (!cancelled) {
+          setEntries(nextEntries);
+          setPlayers(nextPlayers);
+          setDrills(nextDrills);
+        }
       } catch (loadError) {
         if (!cancelled) setError(loadError.message || "Could not load saved drill scores.");
       } finally {
@@ -73,6 +86,26 @@ export default function DataPage() {
     }
   };
 
+  const handleExport = async ({ dateFrom: exportFrom, dateTo: exportTo, selectedPlayerIds, selectedDrillIds }) => {
+    const selectedPlayers = players.filter((player) => selectedPlayerIds.includes(player.id));
+    const selectedDrills = drills.filter((drill) => selectedDrillIds.includes(drill.id));
+    const exportEntries = entries.filter((entry) => {
+      if (!selectedPlayerIds.includes(entry.player_id)) return false;
+      if (!selectedDrillIds.includes(entry.drill_id)) return false;
+      if (exportFrom && entry.entry_date < exportFrom) return false;
+      if (exportTo && entry.entry_date > exportTo) return false;
+      return true;
+    });
+
+    await exportDrillGraphic({
+      entries: exportEntries,
+      players: selectedPlayers,
+      drills: selectedDrills,
+      dateFrom: exportFrom,
+      dateTo: exportTo,
+    });
+  };
+
   return (
     <section className="page-stack">
       <div className="section-heading">
@@ -80,6 +113,14 @@ export default function DataPage() {
           <p className="eyebrow">Saved Scores</p>
           <h2>Data</h2>
         </div>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setExportOpen(true)}
+          disabled={!entries.length}
+        >
+          Export
+        </button>
       </div>
 
       <div className="tab-row">
@@ -151,6 +192,16 @@ export default function DataPage() {
           </section>
         ))}
       </div>
+
+      <ExportGraphicModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        players={players}
+        drills={drills}
+        onExport={handleExport}
+        initialDateFrom={dateFrom}
+        initialDateTo={dateTo}
+      />
     </section>
   );
 }
