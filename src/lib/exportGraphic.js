@@ -34,14 +34,13 @@ async function ensureFontLoaded() {
 function compactDate(value) {
   const [year, month, day] = String(value || "").split("-");
   if (!year || !month || !day) return value;
-  return `${Number(month)}/${Number(day)}/${String(year).slice(-2)}`;
+  return `${Number(month)}-${Number(day)}-${String(year).slice(-2)}`;
 }
 
 function formatDateRange(dateFrom, dateTo) {
-  if (!dateFrom && !dateTo) return "ALL DATES";
-  if (dateFrom && dateTo) return `${compactDate(dateFrom)} - ${compactDate(dateTo)}`;
-  if (dateFrom) return `FROM ${compactDate(dateFrom)}`;
-  return `THROUGH ${compactDate(dateTo)}`;
+  if (!dateFrom && !dateTo) return "";
+  if (dateFrom && dateTo) return `${compactDate(dateFrom)} \u2013 ${compactDate(dateTo)}`;
+  return compactDate(dateFrom || dateTo);
 }
 
 function sumEntryValues(entry) {
@@ -54,6 +53,10 @@ function sumEntryValues(entry) {
 function formatValue(value) {
   if (!Number.isFinite(value)) return "";
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+function firstName(name) {
+  return String(name || "").trim().split(/\s+/)[0] || "";
 }
 
 function fitFontSize(ctx, text, maxWidth, startSize, minSize) {
@@ -85,6 +88,7 @@ function drawText(ctx, text, x, y, {
 }
 
 export async function exportDrillGraphic({
+  title,
   entries,
   players,
   drills,
@@ -96,14 +100,40 @@ export async function exportDrillGraphic({
 
   const totals = new Map();
   for (const player of players) {
-    totals.set(player.id, new Map(drills.map((drill) => [drill.id, 0])));
+    totals.set(player.id, new Map(drills.map((drill) => [drill.id, null])));
   }
 
   for (const entry of entries) {
     const playerRow = totals.get(entry.player_id);
     if (!playerRow || !playerRow.has(entry.drill_id)) continue;
-    playerRow.set(entry.drill_id, playerRow.get(entry.drill_id) + sumEntryValues(entry));
+    const currentValue = playerRow.get(entry.drill_id);
+    const nextValue = sumEntryValues(entry);
+    playerRow.set(entry.drill_id, (currentValue ?? 0) + nextValue);
   }
+
+  const exportPlayers = players
+    .map((player) => {
+      const drillValues = totals.get(player.id) || new Map();
+      let rowTotal = 0;
+      let hasAnyData = false;
+
+      for (const drill of drills) {
+        const value = drillValues.get(drill.id);
+        if (value !== null) {
+          hasAnyData = true;
+          rowTotal += value;
+        }
+      }
+
+      return {
+        ...player,
+        label: firstName(player.name).toUpperCase(),
+        rowTotal,
+        hasAnyData,
+      };
+    })
+    .filter((player) => player.hasAnyData)
+    .sort((a, b) => b.rowTotal - a.rowTotal || a.label.localeCompare(b.label));
 
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
@@ -114,15 +144,16 @@ export async function exportDrillGraphic({
   ctx.fillStyle = NAVY;
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-  drawText(ctx, "DRILL SCORE REPORT", WIDTH / 2, 105, {
+  const graphicTitle = String(title || "").trim() || " ";
+  drawText(ctx, graphicTitle.toUpperCase(), WIDTH / 2, 110, {
     color: WHITE,
     font: '700 78px "DINAlt"',
   });
 
-  const logoSize = 88;
-  ctx.drawImage(logo, WIDTH - 160, 36, logoSize, logoSize);
+  const logoSize = 112;
+  ctx.drawImage(logo, WIDTH - 184, 54, logoSize, logoSize);
 
-  const playerCount = Math.max(players.length, 1);
+  const playerCount = Math.max(exportPlayers.length, 1);
   const drillCount = Math.max(drills.length, 1);
   const tableX = 285;
   const tableY = 234;
@@ -172,34 +203,35 @@ export async function exportDrillGraphic({
     maxWidth: columnWidth - 20,
   });
 
-  players.forEach((player, rowIndex) => {
+  exportPlayers.forEach((player, rowIndex) => {
     const y = tableY + headerHeight + (rowHeight * rowIndex) + (rowHeight / 2);
-    const nameSize = fitFontSize(ctx, player.name.toUpperCase(), 240, 34, 17);
-    drawText(ctx, player.name.toUpperCase(), 150, y, {
+    const nameSize = fitFontSize(ctx, player.label, 240, 34, 17);
+    drawText(ctx, player.label, 150, y, {
       color: WHITE,
       font: `700 ${nameSize}px "DINAlt"`,
       maxWidth: 250,
     });
 
-    let rowTotal = 0;
     drills.forEach((drill, columnIndex) => {
-      const value = totals.get(player.id)?.get(drill.id) || 0;
-      rowTotal += value;
+      const value = totals.get(player.id)?.get(drill.id) ?? null;
       const x = tableX + (columnWidth * columnIndex) + (columnWidth / 2);
       drawText(ctx, formatValue(value), x, y, {
         font: '700 46px "DINAlt"',
       });
     });
 
-    drawText(ctx, formatValue(rowTotal), totalX, y, {
+    drawText(ctx, formatValue(player.rowTotal), totalX, y, {
       font: '700 46px "DINAlt"',
     });
   });
 
-  drawText(ctx, formatDateRange(dateFrom, dateTo), WIDTH / 2, HEIGHT - 78, {
-    color: WHITE,
-    font: '700 40px "DINAlt"',
-  });
+  const footerDate = formatDateRange(dateFrom, dateTo);
+  if (footerDate) {
+    drawText(ctx, footerDate, WIDTH / 2, HEIGHT - 78, {
+      color: WHITE,
+      font: '700 40px "DINAlt"',
+    });
+  }
 
   const link = document.createElement("a");
   link.href = canvas.toDataURL("image/png");

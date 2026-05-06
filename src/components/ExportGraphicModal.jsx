@@ -42,6 +42,7 @@ export default function ExportGraphicModal({
 }) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [title, setTitle] = useState("");
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
   const [selectedDrillIds, setSelectedDrillIds] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -51,6 +52,7 @@ export default function ExportGraphicModal({
     if (!open) return;
     setDateFrom(initialDateFrom || "");
     setDateTo(initialDateTo || "");
+    setTitle("");
     setSelectedPlayerIds(players.map((player) => player.id));
     setSelectedDrillIds(drills.map((drill) => drill.id));
     setBusy(false);
@@ -91,6 +93,7 @@ export default function ExportGraphicModal({
     setError("");
     try {
       await onExport({
+        title,
         dateFrom,
         dateTo,
         selectedPlayerIds,
@@ -118,6 +121,16 @@ export default function ExportGraphicModal({
         </div>
 
         <form className="modal-form" onSubmit={handleSubmit}>
+          <label className="field-block">
+            <span>Graphic Title</span>
+            <input
+              type="text"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Enter a custom title"
+            />
+          </label>
+
           <div className="filter-row">
             <label className="field-block">
               <span>From</span>

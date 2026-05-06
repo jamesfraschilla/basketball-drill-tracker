@@ -159,6 +159,18 @@ button {
   font-weight: 700;
 }
 
+.export-button {
+  margin-top: 14px;
+  align-self: end;
+  background: #c62828;
+  color: #ffffff;
+}
+
+.export-button:disabled {
+  background: rgba(198, 40, 40, 0.45);
+  color: rgba(255, 255, 255, 0.82);
+}
+
 .secondary-button,
 .ghost-button,
 .icon-button {

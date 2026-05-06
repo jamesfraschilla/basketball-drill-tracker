@@ -97,7 +97,13 @@ export default function DataPage() {
     }
   };
 
-  const handleExport = async ({ dateFrom: exportFrom, dateTo: exportTo, selectedPlayerIds, selectedDrillIds }) => {
+  const handleExport = async ({
+    title,
+    dateFrom: exportFrom,
+    dateTo: exportTo,
+    selectedPlayerIds,
+    selectedDrillIds,
+  }) => {
     const selectedPlayers = players.filter((player) => selectedPlayerIds.includes(player.id));
     const selectedDrills = drills.filter((drill) => selectedDrillIds.includes(drill.id));
     const exportEntries = entries.filter((entry) => {
@@ -109,6 +115,7 @@ export default function DataPage() {
     });
 
     await exportDrillGraphic({
+      title,
       entries: exportEntries,
       players: selectedPlayers,
       drills: selectedDrills,
@@ -126,7 +133,7 @@ export default function DataPage() {
         </div>
         <button
           type="button"
-          className="primary-button"
+          className="primary-button export-button"
           onClick={() => setExportOpen(true)}
           disabled={!entries.length}
         >
