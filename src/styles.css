@@ -425,6 +425,19 @@ button {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.checkbox-row-action {
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  color: var(--text);
+}
+
+.checkbox-row-plus {
+  width: 22px;
+  display: inline-flex;
+  justify-content: center;
+  font-size: 24px;
+  line-height: 1;
+}
+
 .checkbox-row input {
   width: 18px;
   height: 18px;

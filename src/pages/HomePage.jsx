@@ -64,14 +64,14 @@ export default function HomePage() {
     return player;
   };
 
-  const handleAddDraft = (payload) => {
+  const handleAddDrafts = (payloads) => {
     setDrafts((current) => [
       ...current,
-      {
+      ...payloads.map((payload) => ({
         ...payload,
         local_id: buildDraftId(),
         values: Object.fromEntries(payload.fields.map((field) => [field.key, ""])),
-      },
+      })),
     ]);
     setStatus("");
   };
@@ -110,8 +110,8 @@ export default function HomePage() {
           <p className="eyebrow">Daily Workflow</p>
           <h2>Enter drill scores as they happen.</h2>
           <p className="hero-copy">
-            Use the yellow plus button to pick a date, select or create a drill, pick or create a player,
-            and bring that scorecard onto the main page for entry.
+            Use the yellow plus button to pick a date, select or create drills and players,
+            and bring every selected combination onto the main page for entry.
           </p>
         </div>
         <div className="backend-pill">{backendLabel}</div>
@@ -161,7 +161,7 @@ export default function HomePage() {
         players={players}
         onCreateDrill={handleCreateDrill}
         onCreatePlayer={handleCreatePlayer}
-        onAddDraft={handleAddDraft}
+        onAddDrafts={handleAddDrafts}
       />
     </section>
   );
