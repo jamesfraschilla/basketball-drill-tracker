@@ -225,14 +225,6 @@ export async function exportDrillGraphic({
     });
   });
 
-  const footerDate = formatDateRange(dateFrom, dateTo);
-  if (footerDate) {
-    drawText(ctx, footerDate, WIDTH / 2, HEIGHT - 78, {
-      color: WHITE,
-      font: '700 40px "DINAlt"',
-    });
-  }
-
   const link = document.createElement("a");
   link.href = canvas.toDataURL("image/png");
   link.download = `drill-report-${Date.now()}.png`;
